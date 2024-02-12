@@ -41,12 +41,9 @@ std::optional<nlohmann::json> optionalValueAt(const nlohmann::json & value, cons
 }
 
 
-std::optional<nlohmann::json> getNullable(const nlohmann::json & value)
+const nlohmann::json * getNullable(const nlohmann::json & value)
 {
-    if (value.is_null())
-        return std::nullopt;
-
-    return value.get<nlohmann::json>();
+    return value.is_null() ? nullptr : &value;
 }
 
 /**
