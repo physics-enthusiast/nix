@@ -82,4 +82,22 @@ struct NixStringContextElem {
 
 typedef std::set<NixStringContextElem> NixStringContext;
 
+struct NixImportContextNode {
+    struct NixImportContextPriors {
+        NixImportContextNode * left, right;
+    };
+
+    using Target = union
+    {
+        Value * importSource
+        NixImportContextPriors priors;
+    };
+
+    Target target;
+};
+
+struct NixImportContext {
+    std::unordered_map<int, NixImportContextNode *> contextUnionMap;
+    std::unordered_map<int, NixImportContextNode *> contextEquivalentsMap;
+}; 
 }
