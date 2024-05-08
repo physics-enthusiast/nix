@@ -9,6 +9,8 @@
 
 namespace nix {
 
+struct Value;
+
 class BadNixStringContextElem : public Error
 {
 public:
@@ -97,7 +99,9 @@ struct NixImportContextNode {
 };
 
 struct NixImportContext {
-    std::unordered_map<int, NixImportContextNode *> contextUnionMap;
+    std::unordered_map<int, NixImportContextNode *> contextUnionsMap;
     std::unordered_map<int, NixImportContextNode *> contextEquivalentsMap;
+    std::unordered_map<Value *, int> contextRootsMap;
+    std::vector<NixImportContextNode *> contextRoots;
 }; 
 }
