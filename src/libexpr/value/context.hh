@@ -3,6 +3,9 @@
 
 #include "comparator.hh"
 #include "derived-path.hh"
+#if HAVE_BOEHMGC
+#include <gc/gc_allocator.h>
+#endif
 #include "variant-wrapper.hh"
 
 #include <nlohmann/json_fwd.hpp>
@@ -98,10 +101,30 @@ struct NixImportContextNode {
     Target target;
 };
 
+template <class T>
+#ifdef HAVE_BOEHMGC
+using NixImportContextAllocator = gc_allocator<T>;
+#else
+using NixImportContextAllocator = std::allocator<T>;
+#endif
+
+typedef std::vector<
+    NixImportContextNode *,
+    NixImportContextAllocator<NixImportContextNode *>>
+    NixImportContextScope;
+
+template <class T>
+using NixImportContextCache = std::unordered_map<
+    T,
+    NixImportContextNode *,
+    std::hash<T>,
+    std::equal_to<NixImportContextNode *>,
+    NixImportContextAllocator<NixImportContextNode *>>;
+
 struct NixImportContext {
-    std::unordered_map<int, NixImportContextNode *> contextUnionsMap;
-    std::unordered_map<int, NixImportContextNode *> contextEquivalentsMap;
-    std::unordered_map<Value *, int> contextRootsMap;
-    std::vector<NixImportContextNode *> contextRoots;
+    NixImportContextCache<str> contextUnionsCache;
+    NixImportContextCache<std::vector<bool>> contextEquivalentsCache;
+    NixImportContextCache<std::string_view> contextRootsCache;
+    NixImportContextScope * contextRoots;
 }; 
 }
